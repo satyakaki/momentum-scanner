@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Momentum Scanner · NSE · v1.2.0-theme-timestamp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F8FF; --card:#FFFFFF; --card2:#EEF4FF; --line:#C9D6F2; --ink:#122033; --muted:#52627A; --head:#DDEBFF; --hover:#EAF3FF;
+  --link:#0756B8; --link-bg:#E4F0FF; --up:#008A5A; --down:#D11F4A; --focus:#FFB703;
+  --c-breakout:#00A86B; --c-base:#6D28D9; --c-burst:#EA580C; --c-ep:#DB2777; --c-pocket:#0087A8; --c-pull:#2563EB;
+}
+:root[data-theme="dark"]{
+  --bg:#101426; --card:#1A2037; --card2:#12182B; --line:#3B4569; --ink:#F6F8FF; --muted:#B9C3E0; --head:#242C4B; --hover:#273151;
+  --link:#8FD3FF; --link-bg:#132F4A; --up:#49E6A5; --down:#FF7A93; --focus:#A5C4FF;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 500px at 85% -10%,rgba(37,99,235,.18),transparent 60%),radial-gradient(900px 420px at 0% 0%,rgba(0,168,107,.14),transparent 55%),var(--bg);
+  color:var(--ink);font:14px/1.45 "Plus Jakarta Sans",system-ui,sans-serif;font-variant-numeric:tabular-nums;min-height:100vh}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.page{max-width:1500px;margin:0 auto;padding:20px clamp(14px,3vw,32px) 60px}
+header{display:flex;flex-wrap:wrap;gap:14px 28px;justify-content:space-between;align-items:center;margin-bottom:18px}
+h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.025em;background:linear-gradient(90deg,#00A86B,#2563EB 45%,#DB2777);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ver{font-size:12px;color:var(--muted);font-weight:700;background:none;-webkit-text-fill-color:var(--muted)}
+.sub{color:var(--muted);font-size:13px;margin-top:3px}.last{display:inline-flex;margin-top:9px;padding:7px 12px;border-radius:999px;background:var(--link-bg);color:var(--link);border:1px solid var(--line);font-weight:800;font-size:13px}
+.scan{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+select,.btn,.themeBtn{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 13px;cursor:pointer;color:var(--ink);box-shadow:0 1px 0 rgba(18,32,51,.06)}
+.btn.go{background:linear-gradient(90deg,#00A86B,#00A6D6);border:0;color:#FFFFFF;font-weight:800;padding:10px 18px}.themeBtn{font-weight:800;color:var(--link);background:var(--link-bg)}
+.btn:disabled{opacity:.55;cursor:default}
+#state{font-size:12.5px;color:var(--muted);min-width:230px}
+.prog{height:5px;background:var(--line);border-radius:5px;overflow:hidden;margin-top:5px}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,#34D399,#60A5FA);transition:width .4s}
+
+.tiles{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.tile{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;position:relative;overflow:hidden}
+.tile::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--c,var(--line))}
+.tile[aria-pressed=true]{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--card))}
+.tile b{display:block;font-size:28px;font-weight:800;color:var(--c,var(--ink));line-height:1.1;margin-top:4px}
+.tile span{font-weight:700;font-size:13.5px}
+.tile small{display:block;color:var(--muted);font-size:11.5px;line-height:1.3;margin-top:3px}
+
+.bar{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:14px}
+.sw{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.sw input{appearance:none;width:38px;height:22px;border-radius:22px;background:var(--line);position:relative;cursor:pointer;transition:.15s;margin:0}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s}
+.sw input:checked{background:var(--up)}.sw input:checked::after{left:19px}
+.rs{display:flex;align-items:center;gap:10px}.rs input{accent-color:#A78BFA;width:150px}.rs b{color:#C4B5FD;min-width:22px}
+.bar input[type=search]{margin-left:auto;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;width:220px}
+.count{color:var(--muted);font-size:13px}
+
+.wrap{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:auto;max-height:calc(100vh - 80px)}
+table{border-collapse:separate;border-spacing:0;width:100%;min-width:1500px}
+th{position:sticky;top:0;z-index:2;background:var(--head);padding:11px 12px;text-align:right;font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap;cursor:pointer;user-select:none;border-bottom:1px solid var(--line)}
+th.l,td.l,th:first-child,td:first-child{text-align:left}
+th[aria-sort]{color:var(--ink)}th[aria-sort]::after{content:" ↓"}
+td{padding:11px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+td:first-child,th:first-child{position:sticky;left:0;z-index:1;background:var(--card)}
+th:first-child{z-index:3;background:var(--head)}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--hover)}
+.nm{font-weight:900;font-size:14.5px;display:flex;align-items:center;gap:8px;color:var(--link);text-decoration:none}.nm:hover{text-decoration:underline;text-underline-offset:3px}
+.nm small{display:block;color:var(--muted);font-weight:500;font-size:11.5px}
+.open{width:24px;height:24px;border-radius:7px;border:1px solid var(--line);display:inline-grid;place-items:center;color:var(--muted);font-size:13px;flex:none}
+tbody tr:hover .open{color:#FFFFFF;background:var(--link);border-color:var(--link)}
+.tags{display:flex;gap:5px;flex-wrap:wrap;max-width:230px}
+.tag{font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px;color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent);border:1px solid color-mix(in srgb,var(--c) 55%,transparent);white-space:nowrap}
+.up{color:var(--up)}.down{color:var(--down)}.m{color:var(--muted)}
+.rsb{display:inline-block;min-width:38px;text-align:center;font-weight:800;padding:3px 8px;border-radius:8px;color:#0C0D1B;background:var(--h)}
+.dots{display:inline-flex;gap:3px;align-items:center}.dots i{width:8px;height:8px;border-radius:50%;background:var(--line)}.dots i.on{background:var(--up)}
+.dots b{margin-left:6px;font-size:12px}
+.qs{display:inline-flex;gap:6px}
+.q{width:60px;text-align:center;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:3px 5px}
+.q small{display:block;font-size:10px;color:var(--muted);line-height:1.2}.q b{display:block;font-size:12.5px}.q em{display:block;font-style:normal;font-size:10.5px;font-weight:700}
+.empty{padding:64px 24px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--ink);font-size:19px;margin-bottom:8px}
+.note{margin:14px 2px;color:var(--muted);font-size:12px}
+@media(max-width:1100px){.tiles{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:620px){.tiles{grid-template-columns:repeat(2,1fr)}}
+@media (prefers-reduced-motion:reduce){.prog i,.sw input,.sw input::after{transition:none}}
+</style>
+</head>
+<body>
+<div class="page">
+<header>
+  <div><h1>Momentum Scanner <small class="ver">v1.2.0-theme-timestamp</small></h1><div class="sub">Stage-2 leaders with breakout, base and pivot setups. Click any stock to open its Kite TV chart in a new tab.</div><div class="last" id="lastScan">Last scan: Not run yet</div></div>
+  <div class="scan">
+    <select id="uni" aria-label="Stocks to scan"><option value="nifty500">Nifty 500 (about 5 min)</option>
+      <option value="midsmall400">Nifty MidSmallcap 400 (about 4 min)</option>
+      <option value="midcap150">Nifty Midcap 150 (about 2 min)</option>
+      <option value="smallcap100">Nifty Smallcap 100 (about 1 min)</option>
+      <option value="all_nse">All NSE stocks (about 15 min)</option></select>
+    <button class="btn go" id="scanBtn">Scan now</button>
+    <div id="state" aria-live="polite"></div>
+  </div>
+</header>
+
+<div class="tiles" id="tiles"></div>
+
+<div class="bar">
+  <button class="themeBtn" id="themeToggle" type="button" aria-label="Toggle color theme">🌙 Dark theme</button>
+  <label class="sw"><input type="checkbox" id="strict"> Strict trend template (8 of 8)</label>
+  <label class="rs">Min RS rating <input type="range" id="rsmin" min="0" max="99" value="0"><b id="rsv">0</b></label>
+  <label class="sw"><input type="checkbox" id="profit"> Profitable only</label>
+  <label class="sw"><input type="checkbox" id="grow"> Sales growing</label>
+  <span class="count" id="count"></span>
+  <input type="search" id="q" placeholder="Search stock" aria-label="Search stock">
+</div>
+
+<div class="wrap"><table><thead><tr id="head"></tr></thead><tbody id="rows"></tbody></table>
+<div class="empty" id="empty" hidden></div></div>
+<p class="note" id="note"></p>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const f1=(n,d=1)=>n==null?"–":Number(n).toLocaleString("en-IN",{maximumFractionDigits:d});
+const cr=n=>n==null?"–":Math.abs(n)>=100?f1(n,0):f1(n,1);
+const mc=n=>n==null?"–":n>=1e5?"₹"+(n/1e5).toFixed(2)+"L Cr":"₹"+f1(n,0)+" Cr";
+const T={"Breakout":"--c-breakout","Tight base":"--c-base","Momentum burst":"--c-burst","Episodic pivot":"--c-ep","Pocket pivot":"--c-pocket","Pullback":"--c-pull"};
+const tc=t=>`var(${T[t]})`;
+const CHECKS=["Price above 150 and 200-day average","150-day above 200-day","200-day average rising for a month","50-day above 150 and 200-day","Price above 50-day","30%+ above 52-week low","Within 25% of 52-week high","RS rating 70 or more"];
+const THEME_KEY="momentum-scanner-theme";
+let rows=[],setups={},tag="all",sortKey="rs",sortDir=-1;
+function applyTheme(theme){
+  document.documentElement.dataset.theme=theme;
+  localStorage.setItem(THEME_KEY,theme);
+  const b=$("#themeToggle"); if(b)b.textContent=theme==="dark"?"☀️ Light theme":"🌙 Dark theme";
+}
+applyTheme(localStorage.getItem(THEME_KEY)||"light");
+
+const COLS=[["name","Stock","l",r=>r.name||r.symbol],["tags","Setup","l",null],["price","Price","",r=>r.price],["chg","Day %","",r=>r.chg],
+ ["rs","RS rating","",r=>r.rs],["score","Trend template","",r=>r.score],["volx","Volume ×","",r=>r.volx],["from_high","From 52w high","",r=>r.from_high],
+ ["mcap_cr","Market cap","",r=>r.mcap_cr??-1],["eps_ttm","EPS (TTM)","",r=>r.eps_ttm??-9999],
+ ["sales","Sales, last 4 quarters (₹ Cr)","",null],["profit","Profit, last 4 quarters (₹ Cr)","",null],
+ ["pat_ttm","Total PAT (TTM)","",r=>r.pat_ttm??-9e9],["pat_fy","PAT last FY","",r=>r.pat_fy??-9e9],
+ ["risk_pct","Stop · Risk","",r=>r.risk_pct]];
+
+function heat(rs){const h=Math.round(rs*1.2);return `hsl(${h} 80% 62%)`}
+function quarters(a){
+  if(!a||!a.length)return '<span class="m">–</span>';
+  return `<span class="qs">${a.map(x=>{const g=x.g;
+    return `<span class="q" title="${esc(x.q)}: ₹${cr(x.v)} Cr"><small>${esc(x.q)}</small><b>${cr(x.v)}</b><em class="${g==null?'m':g>=0?'up':'down'}">${g==null?'–':(g>=0?'▲':'▼')+Math.abs(g)+'%'}</em></span>`}).join("")}</span>`;
+}
+function chartUrl(row){
+  return row.kite_url||("https://kite.zerodha.com/marketwatch?search="+encodeURIComponent("NSE:"+row.symbol));
+}
+function showLastScan(meta){
+  const text=meta?.last_scan_display||meta?.last_scan_at_ist||meta?.last_scan_at||meta?.at;
+  $("#lastScan").textContent="Last scan: "+(text?String(text).replace("T"," "):"Not run yet");
+}
+
+function passes(r,skipTag){
+  if(!skipTag&&tag!=="all"&&!r.tags.includes(tag))return false;
+  if($("#strict").checked&&!r.strict)return false;
+  if(r.rs<+$("#rsmin").value)return false;
+  if($("#profit").checked&&!((r.pat_ttm??-1)>0))return false;
+  if($("#grow").checked){const s=r.sales||[];const last=s[s.length-1];if(!(r.sales_yoy>0||(last&&last.g>0)))return false}
+  const q=$("#q").value.trim().toLowerCase();if(q&&!((r.name||"").toLowerCase().includes(q)||r.symbol.toLowerCase().includes(q)))return false;
+  return true;
+}
+
+function render(){
+  const pool=rows.filter(r=>passes(r,true));
+  const cnt=t=>t==="all"?pool.length:pool.filter(r=>r.tags.includes(t)).length;
+  $("#tiles").innerHTML=[["all","All setups","Every stock that matches",null],...Object.keys(T).map(k=>[k,k,setups[k]||"",tc(k)])].map(([k,l,d,c])=>
+    `<button class="tile" data-k="${esc(k)}" style="--c:${c||'#C7CBFF'}" aria-pressed="${tag===k}"><span>${esc(l)}</span><b>${cnt(k)}</b><small>${esc(d)}</small></button>`).join("");
+  document.querySelectorAll(".tile").forEach(t=>t.onclick=()=>{tag=t.dataset.k;render()});
+
+  $("#head").innerHTML=COLS.map(c=>`<th class="${c[2]}" data-k="${c[0]}" ${sortKey===c[0]?'aria-sort="descending"':''} tabindex="0">${c[1]}</th>`).join("");
+  $("#head").querySelectorAll("th").forEach(th=>{const f=()=>{const c=COLS.find(x=>x[0]===th.dataset.k);if(!c[3])return;
+    sortDir=sortKey===c[0]?-sortDir:(c[0]==="name"||c[0]==="risk_pct"?1:-1);sortKey=c[0];render()};th.onclick=f;th.onkeydown=e=>e.key==="Enter"&&f()});
+
+  const get=COLS.find(c=>c[0]===sortKey)[3];
+  const list=rows.filter(r=>passes(r)).sort((a,b)=>{const x=get(a),y=get(b);return(x>y?1:x<y?-1:0)*sortDir});
+  $("#count").textContent=`${list.length} stock${list.length===1?"":"s"}`;
+  $("#rows").innerHTML=list.map((r,i)=>`<tr data-i="${i}" tabindex="0" title="Open ${esc(r.symbol)} on Kite">
+   <td><a class="nm" href="${esc(chartUrl(r))}" target="_blank" rel="noopener noreferrer" title="Open Kite TV chart for ${esc(r.symbol)}"><span class="open">↗</span><div>${esc(r.name||r.symbol)}<small>${esc(r.symbol)} · ${esc(r.sector||"–")}</small></div></a></td>
+   <td class="l"><div class="tags">${r.tags.map(t=>`<span class="tag" style="--c:${tc(t)}">${t}${t==="Episodic pivot"&&r.ep_days?` (${r.ep_days}d ago)`:""}</span>`).join("")}</div></td>
+   <td><b>₹${f1(r.price,2)}</b></td><td class="${r.chg>=0?'up':'down'}">${r.chg>0?'+':''}${f1(r.chg,2)}%</td>
+   <td><span class="rsb" style="--h:${heat(r.rs)}">${r.rs}</span></td>
+   <td><span class="dots" title="${r.checks.map((c,i)=>(c?'✓ ':'✗ ')+CHECKS[i]).join('\n')}">${r.checks.map(c=>`<i class="${c?'on':''}"></i>`).join("")}<b>${r.score}/8</b></span></td>
+   <td class="${r.volx>=1.5?'up':''}">${f1(r.volx)}×</td><td class="${r.from_high>-5?'up':''}">${f1(r.from_high)}%</td>
+   <td>${mc(r.mcap_cr)}</td><td>${r.eps_ttm==null?'–':'₹'+f1(r.eps_ttm,2)}</td>
+   <td>${quarters(r.sales)}</td><td>${quarters(r.profit)}</td>
+   <td class="${r.pat_ttm>0?'up':r.pat_ttm<0?'down':''}"><b>${r.pat_ttm==null?'–':cr(r.pat_ttm)}</b></td><td>${r.pat_fy==null?'–':cr(r.pat_fy)}${r.fy_label?`<small class="m"> ${esc(r.fy_label)}</small>`:''}</td>
+   <td>₹${f1(r.stop,2)}<small class="down"> −${r.risk_pct}%</small></td></tr>`).join("");
+  $("#rows").querySelectorAll("tr").forEach(tr=>{tr.onkeydown=e=>{if(e.key==="Enter"){tr.querySelector("a.nm").click()}}});
+  const e=$("#empty");e.hidden=list.length>0;
+  e.innerHTML=rows.length?"<b>Nothing matches these filters</b>Switch off a filter or pick another setup tile.":"<b>No scan yet</b>Press “Scan now”. The app downloads the stock list and prices from the internet by itself. Nothing to upload.";
+}
+
+async function load(){
+  const j=await(await fetch("/api/results")).json();rows=j.rows||[];setups=j.setups||{};showLastScan(j.meta||{});
+  const last=(j.meta?.last_scan_display||j.meta?.at||"").toString().replace("T"," ");
+  $("#note").textContent=j.meta&&j.meta.at?`Last scan ${last} · ${j.meta.scanned} stocks analysed · ${j.meta.version||"v1.2.0-theme-timestamp"}. RS rating ranks each stock's price strength against all scanned stocks (99 is strongest). Prices are daily closes, so scan after market hours. Not investment advice.`:`${j.meta?.version||"v1.2.0-theme-timestamp"} · Kite charts use data/instruments.csv when available.`;
+  render();
+}
+let was=false;
+async function poll(){
+  try{const s=await(await fetch("/api/status")).json(),el=$("#state");$("#scanBtn").disabled=s.running;
+    if(s.running){const p=s.total?Math.round(s.done/s.total*100):5;el.innerHTML=`${esc(s.message)} ${s.total?`(${s.done}/${s.total})`:""}<div class="prog"><i style="width:${p}%"></i></div>`}
+    else el.textContent=s.message||"";
+    if(was&&!s.running)load();was=s.running}catch{$("#state").textContent="Server not reachable"}
+}
+$("#scanBtn").onclick=async()=>{const r=await fetch("/api/scan?universe_name="+$("#uni").value,{method:"POST"});if(r.ok){was=true;poll()}else alert((await r.json()).detail)};
+$("#themeToggle").onclick=()=>applyTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
+["#strict","#profit","#grow"].forEach(s=>$(s).onchange=render);$("#q").oninput=render;
+$("#rsmin").oninput=e=>{$("#rsv").textContent=e.target.value;render()};
+load();poll();setInterval(poll,2000);
+</script>
+</body>
+</html>
